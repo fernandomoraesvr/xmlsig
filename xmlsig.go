@@ -5,6 +5,7 @@ import (
 	"crypto"
 	"crypto/rand"
 	"errors"
+
 	// import supported crypto hash function
 	_ "crypto/sha1"
 	_ "crypto/sha256"
@@ -168,4 +169,21 @@ func (s *signer) digest(data []byte) string {
 	h.Write(data)
 	sum := h.Sum(nil)
 	return base64.StdEncoding.EncodeToString(sum)
+}
+
+const (
+	encodingType            = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary"
+	binaryValueTypeSingle   = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3"
+	binaryValueTypeMultiple = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509PKIPathv1"
+)
+
+func (s *signer) CreateBinarySecurityToken() (*BinarySecurityToken, error) {
+	base64string := base64.StdEncoding.EncodeToString([]byte(s.cert))
+	result := &BinarySecurityToken{
+		Value:        base64string,
+		EncodingType: encodingType,
+		ValueType:    binaryValueTypeMultiple,
+		ID:           "binarytoken",
+	}
+	return result, nil
 }

@@ -55,3 +55,11 @@ type X509Data struct {
 	XMLName         xml.Name `xml:"http://www.w3.org/2000/09/xmldsig# X509Data"`
 	X509Certificate string   `xml:"http://www.w3.org/2000/09/xmldsig# X509Certificate"`
 }
+
+// BinarySecurityToken contains the binary security token for X509 certificates
+type BinarySecurityToken struct {
+	ValueType    string `xml:"ValueType,attr"`
+	EncodingType string `xml:"EncodingType,attr"`
+	ID           string `xml:"wsu:Id,attr"`
+	Value        string `xml:",chardata"`
+}
