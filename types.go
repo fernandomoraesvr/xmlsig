@@ -13,7 +13,7 @@ type Signature struct {
 	SignedInfo         SignedInfo
 	SignatureValue     string `xml:"http://www.w3.org/2000/09/xmldsig# SignatureValue"`
 	KeyInfo            KeyInfo
-	CanonicalizedInput string
+	CanonicalizedInput string `xml:"-"`
 }
 
 // Algorithm describes the digest or signature used when digest or signature.
