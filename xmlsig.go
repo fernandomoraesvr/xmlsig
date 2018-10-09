@@ -18,6 +18,7 @@ import (
 type Signer interface {
 	Sign([]byte) (string, error)
 	CreateSignature(interface{}) (*Signature, error)
+	ValidateSignature(digest, signedData string) bool
 	Algorithm() string
 	CreateBinarySecurityToken() *BinarySecurityToken
 }
@@ -179,6 +180,13 @@ func (s *signer) digest(data []byte) string {
 	h.Write(data)
 	sum := h.Sum(nil)
 	return base64.StdEncoding.EncodeToString(sum)
+}
+
+func (s *signer) ValidateSignature(digest, signedData string) bool {
+	signedBytes := []byte(signedData)
+	digestOfSignedBytes := s.digest(signedBytes)
+
+	return digest == digestOfSignedBytes
 }
 
 const (
