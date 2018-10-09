@@ -130,15 +130,17 @@ func (s *signer) CreateSignature(data interface{}) (*Signature, error) {
 	digest := s.digest(canonData)
 	signature.SignedInfo.Reference.DigestValue = digest
 	// canonicalize the SignedInfo
-	canonData, _, err = canonicalize(signature.SignedInfo)
+	canonData, canonicalizedString, err := canonicalize(signature.SignedInfo)
 	if err != nil {
 		return nil, err
 	}
+
 	sig, err := s.Sign(canonData)
 	if err != nil {
 		return nil, err
 	}
 	signature.SignatureValue = sig
+	signature.CanonicalizedInput = canonicalizedString
 	x509Data := &X509Data{X509Certificate: s.cert}
 	signature.KeyInfo.X509Data = x509Data
 	return signature, nil

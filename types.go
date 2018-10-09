@@ -9,10 +9,11 @@ Schema for XML Signatures, http://www.w3.org/2000/09/xmldsig.
 
 // Signature element is the root element of an XML Signature.
 type Signature struct {
-	XMLName        xml.Name `xml:"http://www.w3.org/2000/09/xmldsig# Signature"`
-	SignedInfo     SignedInfo
-	SignatureValue string `xml:"http://www.w3.org/2000/09/xmldsig# SignatureValue"`
-	KeyInfo        KeyInfo
+	XMLName            xml.Name `xml:"http://www.w3.org/2000/09/xmldsig# Signature"`
+	SignedInfo         SignedInfo
+	SignatureValue     string `xml:"http://www.w3.org/2000/09/xmldsig# SignatureValue"`
+	KeyInfo            KeyInfo
+	CanonicalizedInput string
 }
 
 // Algorithm describes the digest or signature used when digest or signature.
