@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 )
 
 /* canonicalize produces canonical XML when marshalling the data structure
@@ -76,7 +77,8 @@ func canonicalize(data interface{}) ([]byte, string, error) {
 			if firstElem {
 				firstElem = false
 				for i := range t.Attr {
-					if t.Attr[i].Name.Local == "ID" || t.Attr[i].Name.Local == "Id" {
+					localName := t.Attr[i].Name.Local
+					if localName == "ID" || localName == "Id" || strings.HasSuffix(localName, "Id") {
 						id = t.Attr[i].Value
 					}
 				}
