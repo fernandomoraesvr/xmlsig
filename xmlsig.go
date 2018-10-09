@@ -126,11 +126,13 @@ func (s *signer) CreateSignature(data interface{}) (*Signature, error) {
 	if id != "" {
 		signature.SignedInfo.Reference.URI = "#" + id
 	}
+
+	signature.CanonicalizedInput = string(canonData)
 	// calculate the digest
 	digest := s.digest(canonData)
 	signature.SignedInfo.Reference.DigestValue = digest
 	// canonicalize the SignedInfo
-	canonData, canonicalizedString, err := canonicalize(signature.SignedInfo)
+	canonData, _, err = canonicalize(signature.SignedInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +142,7 @@ func (s *signer) CreateSignature(data interface{}) (*Signature, error) {
 		return nil, err
 	}
 	signature.SignatureValue = sig
-	signature.CanonicalizedInput = canonicalizedString
+
 	x509Data := &X509Data{X509Certificate: s.cert}
 	signature.KeyInfo.X509Data = x509Data
 	return signature, nil

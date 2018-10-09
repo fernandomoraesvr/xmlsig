@@ -19,7 +19,10 @@ type Signature struct {
 // Algorithm describes the digest or signature used when digest or signature.
 type Algorithm struct {
 	Algorithm string `xml:",attr"`
+	// InclusiveNamespace InclusiveNamespace `xml:",omitempty"`
 }
+
+// type InclusiveNamespace struct {}
 
 // SignedInfo includes a canonicalization algorithm, a signature algorithm, and a reference.
 type SignedInfo struct {
