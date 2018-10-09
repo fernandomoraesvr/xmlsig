@@ -31,41 +31,6 @@ func canonicalize(data interface{}) ([]byte, string, error) {
 	outWriter := bufio.NewWriter(&out)
 	firstElem := true
 	id := ""
-	writeStartElement := func(writer io.Writer, start xml.StartElement) {
-		fmt.Fprintf(writer, "<%s", start.Name.Local)
-		sort.Sort(canonAtt(start.Attr))
-		currentNs, err := namespaces.Top()
-		if err != nil {
-			// No namespaces yet declare ours
-			fmt.Fprintf(writer, " %s=\"%s\"", "xmlns", start.Name.Space)
-		} else {
-			// Different namespace declare ours
-			if currentNs != start.Name.Space {
-				fmt.Fprintf(writer, " %s=\"%s\"", "xmlns", start.Name.Space)
-			}
-		}
-		namespaces.Push(start.Name.Space)
-		nsmap := make(map[string]string)
-		for _, att := range start.Attr {
-			// Skip xmlns declarations they're handled above
-			if "xmlns" == att.Name.Local {
-				continue
-			}
-			// is this a declaration for an attribute namespace
-			if "xmlns" == att.Name.Space {
-				fmt.Fprintf(writer, " xmlns:%s=\"%s\"", att.Name.Local, att.Value)
-				nsmap[att.Value] = att.Name.Local
-				continue
-			}
-			// is attribute namespaced?
-			if att.Name.Space == "" {
-				fmt.Fprintf(writer, " %s=\"%s\"", att.Name.Local, att.Value)
-			} else {
-				fmt.Fprintf(writer, " %s:%s=\"%s\"", nsmap[att.Name.Space], att.Name.Local, att.Value)
-			}
-		}
-		fmt.Fprint(writer, ">")
-	}
 	for {
 		token, err := decoder.Token()
 		if err != nil {
@@ -83,7 +48,7 @@ func canonicalize(data interface{}) ([]byte, string, error) {
 					}
 				}
 			}
-			writeStartElement(outWriter, t)
+			writeStartElement(outWriter, t, namespaces)
 
 		case xml.EndElement:
 			namespaces.Pop()
@@ -95,6 +60,42 @@ func canonicalize(data interface{}) ([]byte, string, error) {
 	}
 	outWriter.Flush()
 	return out.Bytes(), id, nil
+}
+
+func writeStartElement(writer io.Writer, start xml.StartElement, namespaces *stack) {
+	fmt.Fprintf(writer, "<%s", start.Name.Local)
+	sort.Sort(canonAtt(start.Attr))
+	currentNs, err := namespaces.Top()
+	if err != nil {
+		// No namespaces yet declare ours
+		fmt.Fprintf(writer, " %s=\"%s\"", "xmlns", start.Name.Space)
+	} else {
+		// Different namespace declare ours
+		if currentNs != start.Name.Space {
+			fmt.Fprintf(writer, " %s=\"%s\"", "xmlns", start.Name.Space)
+		}
+	}
+	namespaces.Push(start.Name.Space)
+	nsmap := make(map[string]string)
+	for _, att := range start.Attr {
+		// Skip xmlns declarations they're handled above
+		if "xmlns" == att.Name.Local {
+			continue
+		}
+		// is this a declaration for an attribute namespace
+		if "xmlns" == att.Name.Space {
+			fmt.Fprintf(writer, " xmlns:%s=\"%s\"", att.Name.Local, att.Value)
+			nsmap[att.Value] = att.Name.Local
+			continue
+		}
+		// is attribute namespaced?
+		if att.Name.Space == "" {
+			fmt.Fprintf(writer, " %s=\"%s\"", att.Name.Local, att.Value)
+		} else {
+			fmt.Fprintf(writer, " %s:%s=\"%s\"", nsmap[att.Name.Space], att.Name.Local, att.Value)
+		}
+	}
+	fmt.Fprint(writer, ">")
 }
 
 // Attributes must be sorted as part of canonicalization. This type implements sort.Interface for a slice of xml.Attr.
