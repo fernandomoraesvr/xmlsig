@@ -62,20 +62,31 @@ func canonicalize(data interface{}) ([]byte, string, error) {
 	return out.Bytes(), id, nil
 }
 
-func writeStartElement(writer io.Writer, start xml.StartElement, namespaces *stack) {
-	fmt.Fprintf(writer, "<%s", start.Name.Local)
-	sort.Sort(canonAtt(start.Attr))
+func writeNameSapce(namespaces *stack, writer io.Writer, start xml.StartElement) {
 	currentNs, err := namespaces.Top()
+	namespace := start.Name.Space
 	if err != nil {
 		// No namespaces yet declare ours
-		fmt.Fprintf(writer, " %s=\"%s\"", "xmlns", start.Name.Space)
+		if strings.HasPrefix(namespace, "http") {
+			fmt.Fprintf(writer, " %s=\"%s\"", "xmlns", namespace)
+		}
 	} else {
 		// Different namespace declare ours
-		if currentNs != start.Name.Space {
-			fmt.Fprintf(writer, " %s=\"%s\"", "xmlns", start.Name.Space)
+		if currentNs != namespace {
+			if strings.HasPrefix(namespace, "http") {
+				fmt.Fprintf(writer, " %s=\"%s\"", "xmlns", namespace)
+			}
 		}
 	}
-	namespaces.Push(start.Name.Space)
+	namespaces.Push(namespace)
+}
+
+func writeStartElement(writer io.Writer, start xml.StartElement, namespaces *stack) {
+	fmt.Fprintf(writer, "<%s:%s", start.Name.Space, start.Name.Local)
+	sort.Sort(canonAtt(start.Attr))
+
+	writeNameSapce(namespaces, writer, start)
+
 	nsmap := make(map[string]string)
 	for _, att := range start.Attr {
 		// Skip xmlns declarations they're handled above

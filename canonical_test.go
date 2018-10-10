@@ -18,6 +18,35 @@ type Child struct {
 	Data    string   `xml:",chardata"`
 }
 
+type Body struct {
+	XMLName      xml.Name `xml:"soap:Body"`
+	XMLNamespace string   `xml:"xmlns:wsu,attr"`
+	// XMLNamespace2 string   `xml:"xmlns:soap,attr"`
+	SignatureID string `xml:"wsu:Id,attr"`
+}
+
+func TestCanonicalization2(t *testing.T) {
+	body := &Body{
+		XMLNamespace: "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd",
+		SignatureID:  "SoapBody-445940dd-f66d-4076-8671-9945b6a754df",
+		// XMLNamespace2: "http://www.w3.org/2003/05/soap-envelope",
+	}
+
+	data, _, err := canonicalize(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual := string(data)
+	expected := `<soap:Body xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="SoapBody-445940dd-f66d-4076-8671-9945b6a754df"></soap:Body>`
+
+	if actual != expected {
+		t.Log("Expected: ", expected)
+		t.Log("Actual: ", actual)
+		t.Fatal("Expected and Actual result doesn't match!")
+	}
+}
+
 func TestCanonicalization(t *testing.T) {
 	element := &Root{B: "1", A: "2", C: "3", Child: Child{Data: "data"}}
 	// Go's default encoder would produce the following
