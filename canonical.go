@@ -52,7 +52,11 @@ func canonicalize(data interface{}) ([]byte, string, error) {
 
 		case xml.EndElement:
 			namespaces.Pop()
-			fmt.Fprintf(outWriter, "</%s>", t.Name.Local)
+			if !strings.HasPrefix(t.Name.Local, "http") {
+				fmt.Fprintf(outWriter, "</%s:%s>", t.Name.Space, t.Name.Local)
+			} else {
+				fmt.Fprintf(outWriter, "</%s>", t.Name.Local)
+			}
 
 		case xml.CharData:
 			outWriter.Write(t)
