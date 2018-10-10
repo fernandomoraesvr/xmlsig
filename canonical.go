@@ -86,7 +86,11 @@ func writeNameSapce(namespaces *stack, writer io.Writer, start xml.StartElement)
 }
 
 func writeStartElement(writer io.Writer, start xml.StartElement, namespaces *stack) {
-	fmt.Fprintf(writer, "<%s:%s", start.Name.Space, start.Name.Local)
+	if !strings.HasPrefix(start.Name.Space, "http") {
+		fmt.Fprintf(writer, "<%s:%s", start.Name.Space, start.Name.Local)
+	} else {
+		fmt.Fprintf(writer, "<%s", start.Name.Local)
+	}
 	sort.Sort(canonAtt(start.Attr))
 
 	writeNameSapce(namespaces, writer, start)

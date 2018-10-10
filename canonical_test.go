@@ -21,7 +21,6 @@ type Child struct {
 type Body struct {
 	XMLName      xml.Name `xml:"soap:Body"`
 	XMLNamespace string   `xml:"xmlns:wsu,attr"`
-	// XMLNamespace2 string   `xml:"xmlns:soap,attr"`
 	SignatureID string `xml:"wsu:Id,attr"`
 }
 
@@ -29,7 +28,6 @@ func TestCanonicalization2(t *testing.T) {
 	body := &Body{
 		XMLNamespace: "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd",
 		SignatureID:  "SoapBody-445940dd-f66d-4076-8671-9945b6a754df",
-		// XMLNamespace2: "http://www.w3.org/2003/05/soap-envelope",
 	}
 
 	data, _, err := canonicalize(body)
