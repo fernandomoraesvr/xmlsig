@@ -54,7 +54,21 @@ type Transforms struct {
 type KeyInfo struct {
 	XMLName  xml.Name `xml:"http://www.w3.org/2000/09/xmldsig# KeyInfo"`
 	X509Data *X509Data
+	// KeyValue KeyValue
 	Children []interface{}
+}
+
+// KeyValue holds the RSAKeyValue modulus & exponent
+type KeyValue struct {
+	XMLName     xml.Name `xml:"http://www.w3.org/2000/09/xmldsig# KeyValue"`
+	RSAKeyValue RSAKeyValue
+}
+
+// RSAKeyValue element within KeyValue holds rsa keyvalue
+type RSAKeyValue struct {
+	XMLName  xml.Name `xml:"http://www.w3.org/2000/09/xmldsig# RSAKeyValue"`
+	Modulus  string   `xml:"Modulus"`
+	Exponent string   `xml:"Exponent"`
 }
 
 // X509Data element within KeyInfo contains an X509 certificate

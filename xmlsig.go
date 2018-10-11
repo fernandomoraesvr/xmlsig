@@ -152,10 +152,32 @@ func (s *signer) CreateSignature(data interface{}) (*Signature, error) {
 
 	x509IssuerSerial := X509IssuerSerial{}
 	x509IssuerSerial.SerialNumber = s.X509cert.SerialNumber
-	x509IssuerSerial.IssuerName = s.X509cert.Issuer.String()
-	x509Data := &X509Data{X509Certificate: s.cert, X509IssuerSerial: x509IssuerSerial}
+	issuerName := "emailAddress=" + s.X509cert.EmailAddresses[0] + "," + s.X509cert.Issuer.String()
+	x509IssuerSerial.IssuerName = issuerName
+
+	x509Data := &X509Data{
+		X509Certificate:  s.cert,
+		X509IssuerSerial: x509IssuerSerial,
+	}
+
+	// rsaPublicKey := s.X509cert.PublicKey.(*rsa.PublicKey)
+	// // some vodoo magic to convert the int to the correct base64 representation
+	// exponentArray := make([]byte, 4)
+	// binary.BigEndian.PutUint32(exponentArray, uint32(rsaPublicKey.E))
+	// for i := range exponentArray {
+	// 	if exponentArray[i] != 0 {
+	// 		exponentArray = exponentArray[i:]
+	// 		break
+	// 	}
+	// }
 
 	signature.KeyInfo.X509Data = x509Data
+	// signature.KeyInfo.KeyValue = KeyValue{
+	// 	RSAKeyValue: RSAKeyValue{
+	// 		Modulus:  strings.TrimRight(base64.StdEncoding.EncodeToString(rsaPublicKey.N.Bytes()), "="),
+	// 		Exponent: base64.StdEncoding.EncodeToString(exponentArray),
+	// 	},
+	// }
 
 	return signature, nil
 }
