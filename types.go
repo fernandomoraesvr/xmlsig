@@ -1,6 +1,9 @@
 package xmlsig
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+	"math/big"
+)
 
 /*
 Data structures to represent some of the types defined in
@@ -54,10 +57,18 @@ type KeyInfo struct {
 	Children []interface{}
 }
 
-// X509Data element within KeyInfo contains one an X509 certificate
+// X509Data element within KeyInfo contains an X509 certificate
 type X509Data struct {
-	XMLName         xml.Name `xml:"http://www.w3.org/2000/09/xmldsig# X509Data"`
-	X509Certificate string   `xml:"http://www.w3.org/2000/09/xmldsig# X509Certificate"`
+	XMLName          xml.Name `xml:"http://www.w3.org/2000/09/xmldsig# X509Data"`
+	X509Certificate  string   `xml:"http://www.w3.org/2000/09/xmldsig# X509Certificate"`
+	X509IssuerSerial X509IssuerSerial
+}
+
+// X509IssuerSerial element within X509Data contains the issername and the serialnumber
+type X509IssuerSerial struct {
+	XMLName      xml.Name `xml:"http://www.w3.org/2000/09/xmldsig# X509IssuerSerial"`
+	IssuerName   string   `xml:"X509IssuerName,omitempty"`
+	SerialNumber *big.Int `xml:"X509SerialNumber,omitempty"`
 }
 
 // BinarySecurityToken contains the binary security token for X509 certificates

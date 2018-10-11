@@ -28,6 +28,8 @@ type signer struct {
 	sigAlg    *algorithm
 	digestAlg *algorithm
 	key       crypto.Signer
+	options   SignerOptions
+	X509cert  *x509.Certificate
 }
 
 type algorithm struct {
@@ -38,6 +40,7 @@ type algorithm struct {
 type SignerOptions struct {
 	SignatureAlgorithm string
 	DigestAlgorithm    string
+	EmbedIssuerSerial  bool
 }
 
 func pickSignatureAlgorithm(certType x509.PublicKeyAlgorithm, alg string) (*algorithm, error) {
@@ -92,7 +95,7 @@ func NewSigner(cert tls.Certificate) (Signer, error) {
 	return NewSignerWithOptions(cert, SignerOptions{})
 }
 
-// NewSigner creates a new Signer with the certificate and options
+// NewSignerWithOptions creates a new Signer with the certificate and options
 func NewSignerWithOptions(cert tls.Certificate, options SignerOptions) (Signer, error) {
 	c := cert.Certificate[0]
 	parsedCert, err := x509.ParseCertificate(c)
@@ -108,7 +111,7 @@ func NewSignerWithOptions(cert tls.Certificate, options SignerOptions) (Signer, 
 		return nil, err
 	}
 	k := cert.PrivateKey.(crypto.Signer)
-	return &signer{base64.StdEncoding.EncodeToString(c), sigAlg, digestAlg, k}, nil
+	return &signer{base64.StdEncoding.EncodeToString(c), sigAlg, digestAlg, k, options, parsedCert}, nil
 }
 
 func (s *signer) Algorithm() string {
@@ -130,11 +133,11 @@ func (s *signer) CreateSignature(data interface{}) (*Signature, error) {
 
 	// store the canonicalized data
 	signature.CanonicalizedInput = string(canonData)
-	
+
 	// calculate the digest
 	digest := s.digest(canonData)
 	signature.SignedInfo.Reference.DigestValue = digest
-	
+
 	// canonicalize the SignedInfo
 	canonData, _, err = canonicalize(signature.SignedInfo)
 	if err != nil {
@@ -147,8 +150,13 @@ func (s *signer) CreateSignature(data interface{}) (*Signature, error) {
 	}
 	signature.SignatureValue = sig
 
-	x509Data := &X509Data{X509Certificate: s.cert}
+	x509IssuerSerial := X509IssuerSerial{}
+	x509IssuerSerial.SerialNumber = s.X509cert.SerialNumber
+	x509IssuerSerial.IssuerName = s.X509cert.Issuer.String()
+	x509Data := &X509Data{X509Certificate: s.cert, X509IssuerSerial: x509IssuerSerial}
+
 	signature.KeyInfo.X509Data = x509Data
+
 	return signature, nil
 }
 
