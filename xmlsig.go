@@ -197,7 +197,7 @@ func (s *signer) Sign(data []byte) (string, error) {
 }
 
 const (
-	xMLexcC14Namespace          = "http://www.w3.org/2001/10/xml-exc-c14n#"
+	xMLexcC14Namespace          = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315"
 	envelopedSignatureNamespace = "http://www.w3.org/2000/09/xmldsig#enveloped-signature"
 )
 
