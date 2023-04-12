@@ -17,7 +17,7 @@ import (
 // Signer is used to create a Signature for the provided object.
 type Signer interface {
 	Sign([]byte) (string, error)
-	CreateSignature(data interface{}, uri string, canonicalizationAlgorithm string) (*Signature, error)
+	CreateSignature(data interface{}) (*Signature, error)
 	ValidateSignature(digest, signedData string) bool
 	Algorithm() string
 	CreateBinarySecurityToken() *BinarySecurityToken
@@ -38,9 +38,11 @@ type algorithm struct {
 }
 
 type SignerOptions struct {
-	SignatureAlgorithm string
-	DigestAlgorithm    string
-	EmbedIssuerSerial  bool
+	SignatureAlgorithm        string
+	DigestAlgorithm           string
+	EmbedIssuerSerial         bool
+	URI                       string
+	CanonicalizationAlgorithm string
 }
 
 func pickSignatureAlgorithm(certType x509.PublicKeyAlgorithm, alg string) (*algorithm, error) {
@@ -118,12 +120,12 @@ func (s *signer) Algorithm() string {
 	return s.sigAlg.name
 }
 
-func (s *signer) CreateSignature(data interface{}, uri string, canonicalizationAlgorithm string) (*Signature, error) {
+func (s *signer) CreateSignature(data interface{}) (*Signature, error) {
 	signature := newSignature()
 	signature.SignedInfo.SignatureMethod.Algorithm = s.sigAlg.name
 	signature.SignedInfo.Reference.DigestMethod.Algorithm = s.digestAlg.name
-	signature.SignedInfo.CanonicalizationMethod.Algorithm = canonicalizationAlgorithm
-	signature.SignedInfo.Reference.URI = uri
+	signature.SignedInfo.CanonicalizationMethod.Algorithm = s.options.CanonicalizationAlgorithm
+	signature.SignedInfo.Reference.URI = s.options.URI
 	// canonicalize the Item
 	canonData, id, err := canonicalize(data)
 	if err != nil {
