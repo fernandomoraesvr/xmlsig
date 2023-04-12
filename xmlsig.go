@@ -135,6 +135,7 @@ func (s *signer) CreateSignature(data interface{}) (*Signature, error) {
 		signature.SignedInfo.Reference.URI = "#" + id
 	}
 
+	signature.Xmlns = "http://www.w3.org/2000/09/xmldsig#"
 	// store the canonicalized data
 	signature.CanonicalizedInput = string(canonData)
 
@@ -152,7 +153,7 @@ func (s *signer) CreateSignature(data interface{}) (*Signature, error) {
 	if err != nil {
 		return nil, err
 	}
-	signature.SignatureValue = sig
+	signature.SignatureValue.Value = sig
 
 	x509IssuerSerial := X509IssuerSerial{}
 	x509IssuerSerial.SerialNumber = s.X509cert.SerialNumber

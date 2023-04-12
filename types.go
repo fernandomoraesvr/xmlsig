@@ -12,16 +12,23 @@ Schema for XML Signatures, http://www.w3.org/2000/09/xmldsig.
 
 // Signature element is the root element of an XML Signature.
 type Signature struct {
-	XMLName            SignatureXmlns `xml:"http://www.w3.org/2000/09/xmldsig# Signature"`
+	XMLName            xml.Name `xml:"http://www.w3.org/2000/09/xmldsig# Signature"`
+	Xmlns              string   `xml:"xmlns,attr,omitempty"`
 	SignedInfo         SignedInfo
-	SignatureValue     string `xml:"http://www.w3.org/2000/09/xmldsig# SignatureValue"`
+	SignatureValue     SignatureValueType `xml:"SignatureValue"`
 	KeyInfo            KeyInfo
 	CanonicalizedInput string `xml:"http://www.w3.org/2000/09/xmldsig#"`
 }
 
+// SignatureValueType ...
+type SignatureValueType struct {
+	IdAttr string `xml:"Id,attr,omitempty" json:"Id,attr,omitempty"`
+	Value  string `xml:",chardata" json:",chardata"`
+}
+
 // Signature with Attribute xmlns
 type SignatureXmlns struct {
-	Xmlns string `xml:",attr"`
+	Xmlns string `xml:"xmlns,attr"`
 }
 
 // Algorithm describes the digest or signature used when digest or signature.
